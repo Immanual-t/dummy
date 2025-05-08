@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{# We're removing the admin-session.js script to prevent redirect loops #}
+{# {% block extrahead %}
+{{ block.super }}
+<script src="{% static 'js/admin-session.js' %}"></script>
+{% endblock %} #}

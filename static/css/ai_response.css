@@ -1,0 +1,136 @@
+/* static/css/ai_response.css */
+
+/* Base styling for AI response content */
+.ai-response-content {
+    line-height: 1.6;
+    font-size: 1rem;
+    color: #212529;
+}
+
+.ai-response-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: #0d6efd;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.5rem;
+}
+
+.ai-response-content h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: #0d6efd;
+}
+
+.ai-response-content h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #0d6efd;
+}
+
+.ai-response-content p {
+    margin-bottom: 1rem;
+}
+
+.ai-response-content strong {
+    font-weight: 600;
+    color: #212529;
+}
+
+.ai-response-content em {
+    font-style: italic;
+    color: #495057;
+}
+
+.ai-response-content code {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875em;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+}
+
+.ai-response-content blockquote {
+    border-left: 3px solid #0d6efd;
+    padding-left: 1rem;
+    color: #6c757d;
+    font-style: italic;
+    margin: 1rem 0;
+}
+
+/* List styling */
+.ai-response-content ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.ai-response-content ul li {
+    margin-bottom: 0.5rem;
+}
+
+.ai-response-content .list-group {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.ai-response-content .list-group-item {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+}
+
+/* Keyword highlighting */
+.ai-response-content .text-primary {
+    color: #0d6efd !important;
+    font-weight: 500;
+}
+
+/* Chat message styling */
+.chat-message .ai-response-content {
+    font-size: 0.95rem;
+}
+
+.chat-message .ai-response-content p {
+    margin-bottom: 0.75rem;
+}
+
+.chat-message .ai-response-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Learning content specific styles */
+.learning-content .ai-response-content h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(13, 110, 253, 0.2);
+}
+
+.learning-content .ai-response-content ul {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Insight specific styles */
+.ai-insight .ai-response-content {
+    font-size: 0.9rem;
+}
+
+/* Animation for new responses */
+@keyframes highlight-new {
+    0% { background-color: rgba(13, 110, 253, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.new-response {
+    animation: highlight-new 2s ease-out;
+}
