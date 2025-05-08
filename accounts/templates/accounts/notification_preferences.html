@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notification Preferences | FinArva AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}">Profile</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Notification Preferences</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3">Notification Preferences</h1>
+                <p class="text-muted">Customize how and when you receive notifications</p>
+            </div>
+            <div>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Email Notifications</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" {% if form.email_notifications.value %}checked{% endif %}>
+                                <label class="form-check-label" for="email_notifications">
+                                    Receive email notifications
+                                </label>
+                                <div class="form-text">Get important updates sent to your email address</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">App Notifications</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="app_notifications" name="app_notifications" {% if form.app_notifications.value %}checked{% endif %}>
+                                <label class="form-check-label" for="app_notifications">
+                                    In-app notifications
+                                </label>
+                                <div class="form-text">Receive notifications within the FinArva AI app</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Content Preferences</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="learning_reminders" name="learning_reminders" {% if form.learning_reminders.value %}checked{% endif %}>
+                                <label class="form-check-label" for="learning_reminders">
+                                    Learning reminders
+                                </label>
+                                <div class="form-text">Get reminders to complete your learning modules</div>
+                            </div>
+
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="sales_tips" name="sales_tips" {% if form.sales_tips.value %}checked{% endif %}>
+                                <label class="form-check-label" for="sales_tips">
+                                    Sales tips and best practices
+                                </label>
+                                <div class="form-text">Receive tips to improve your sales performance</div>
+                            </div>
+
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="performance_updates" name="performance_updates" {% if form.performance_updates.value %}checked{% endif %}>
+                                <label class="form-check-label" for="performance_updates">
+                                    Performance updates
+                                </label>
+                                <div class="form-text">Get regular updates about your sales performance</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">About Notifications</h5>
+                </div>
+                <div class="card-body">
+                    <p>FinArva AI uses AI to determine which notifications are most relevant to you based on your sales patterns, learning progress, and performance goals.</p>
+                    <p class="mb-0">You can change these preferences at any time to receive more or fewer notifications.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

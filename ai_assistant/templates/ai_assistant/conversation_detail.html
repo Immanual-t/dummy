@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load ai_formatting %}
+
+{% block title %}Conversation: {{ conversation.title }} | FinArva AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        min-height: 500px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 1rem;
+        scrollbar-width: thin;
+    }
+
+    .chat-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+    }
+
+    .chat-message {
+        padding: 14px 18px;
+        margin-bottom: 15px;
+        border-radius: 15px;
+        max-width: 85%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .chat-message.user {
+        background-color: #e9ecef;
+        border: 1px solid #dee2e6;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+
+    .chat-message.ai {
+        background-color: #e3f2fd;
+        border: 1px solid #c9e3fc;
+        align-self: flex-start;
+        margin-right: auto;
+    }
+
+    .chat-message .sender {
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .chat-message .content {
+        line-height: 1.5;
+    }
+
+    .chat-message .content p {
+        margin-bottom: 0.75rem;
+    }
+
+    .chat-message .content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .chat-message .timestamp {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 6px;
+        text-align: right;
+    }
+
+    .conversation-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .conversation-detail {
+        margin-bottom: 0.5rem;
+    }
+
+    .conversation-detail strong {
+        font-weight: 600;
+        min-width: 100px;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'ai_assistant:copilot' %}">Sales Co-Pilot</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ conversation.title }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3">{{ conversation.title }}</h1>
+                <p class="text-muted">Conversation history and insights</p>
+            </div>
+            <div>
+                <a href="{% url 'ai_assistant:copilot' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> New Conversation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Conversation details -->
+            <div class="conversation-info mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="conversation-detail">
+                            <strong>Customer Type:</strong> {{ conversation.get_customer_type_display }}
+                        </div>
+                        <div class="conversation-detail">
+                            <strong>Product Type:</strong> {{ conversation.get_product_type_display }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="conversation-detail">
+                            <strong>Created:</strong> {{ conversation.created_at|date:"M d, Y H:i" }}
+                        </div>
+                        <div class="conversation-detail">
+                            <strong>Messages:</strong> {{ messages|length }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat content -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Conversation History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chat-container">
+                        {% for message in messages %}
+                            <div class="d-flex flex-column {% if message.role == 'user' %}align-items-end{% else %}align-items-start{% endif %}">
+                                <div class="chat-message {{ message.role }}">
+                                    <div class="sender">
+                                        {% if message.role == 'user' %}You{% else %}FinArva AI{% endif %}
+                                    </div>
+                                    <div class="content">
+                                        {{ message.content|format_chat_message }}
+                                    </div>
+                                    <div class="timestamp">
+                                        {{ message.created_at|time:"g:i A" }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Conversation Analysis -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">AI Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div id="conversationAnalysis">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Analyzing conversation...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <button class="btn btn-primary" id="continueConversation">
+                            <i class="fas fa-comment me-2"></i> Continue This Conversation
+                        </button>
+                        <a href="{% url 'ai_assistant:copilot' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i> Start New Conversation
+                        </a>
+                        <button class="btn btn-outline-secondary" id="exportConversation">
+                            <i class="fas fa-download me-2"></i> Export Conversation
+                        </button>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i> Delete Conversation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this conversation? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'ai_assistant:delete_conversation' conversation.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Continue conversation button
+        const continueBtn = document.getElementById('continueConversation');
+        if (continueBtn) {
+            continueBtn.addEventListener('click', function() {
+                // Create a form to submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{% url "ai_assistant:continue_conversation" conversation.id %}';
+
+                // Add CSRF token
+                const csrfField = document.createElement('input');
+                csrfField.type = 'hidden';
+                csrfField.name = 'csrfmiddlewaretoken';
+                csrfField.value = '{{ csrf_token }}';
+                form.appendChild(csrfField);
+
+                // Add to document, submit, and remove
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+            });
+        }
+
+        // Export conversation button
+        const exportBtn = document.getElementById('exportConversation');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+                // Prepare conversation content
+                let conversationText = 'Conversation: {{ conversation.title }}\n';
+                conversationText += 'Date: {{ conversation.created_at|date:"F j, Y" }}\n';
+                conversationText += 'Customer Type: {{ conversation.get_customer_type_display }}\n';
+                conversationText += 'Product Type: {{ conversation.get_product_type_display }}\n\n';
+
+                {% for message in messages %}
+                conversationText += '{% if message.role == "user" %}You{% else %}FinArva AI{% endif %} ({{ message.created_at|time:"g:i A" }}):\n';
+                conversationText += '{{ message.content|linebreaksbr }}\n\n';
+                {% endfor %}
+
+                // Create download link
+                const blob = new Blob([conversationText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '{{ conversation.title|slugify }}.txt';
+                document.body.appendChild(a);
+                a.click();
+
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            });
+        }
+
+        // Simulate conversation analysis
+        setTimeout(function() {
+            const analysisContainer = document.getElementById('conversationAnalysis');
+            if (analysisContainer) {
+                // Generate analysis based on the conversation
+                analysisContainer.innerHTML = `
+                    <div class="mb-3">
+                        <h6 class="mb-2">Key Topics Discussed:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-primary">{{ conversation.get_product_type_display }}</span>
+                            <span class="badge bg-secondary">Pricing</span>
+                            <span class="badge bg-info">Features</span>
+                            <span class="badge bg-warning text-dark">Benefits</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="mb-2">Conversation Quality:</h6>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 75%;"
+                                aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">Needs Improvement</small>
+                            <small class="text-muted">Excellent</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="mb-2">Insights:</h6>
+                        <ul class="mb-0">
+                            <li>Customer showed interest in {{ conversation.get_product_type_display }} features</li>
+                            <li>You addressed 3 objections effectively</li>
+                            <li>Try elaborating more on benefits next time</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h6 class="mb-2">Next Steps:</h6>
+                        <div class="alert alert-primary mb-0">
+                            <strong>Follow up</strong> within 24 hours to check if the customer needs more information.
+                        </div>
+                    </div>
+                `;
+            }
+        }, 1500);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product_type|title }} Skill Assessment | FinArva AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .assessment-card {
+        transition: all 0.3s;
+        margin-bottom: 20px;
+    }
+    .assessment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .question-container {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: a20px;
+        margin-bottom: 20px;
+    }
+    .option-item {
+        padding: 10px 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .option-item:hover {
+        background-color: #e9ecef;
+    }
+    .option-item.selected {
+        background-color: #cfe2ff;
+        border-color: #0d6efd;
+    }
+    .result-feedback {
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    .feedback-success {
+        background-color: #d1e7dd;
+        border: 1px solid #badbcc;
+    }
+    .feedback-warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffecb5;
+    }
+    .feedback-danger {
+        background-color: #f8d7da;
+        border: 1px solid #f5c2c7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}">Profile</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ product_type|title }} Skill Assessment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3">{{ product_type|title }} Skill Assessment</h1>
+                <p class="text-muted">Test your knowledge and improve your proficiency level</p>
+            </div>
+            <div>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ product_type|title }} Knowledge Assessment</h5>
+                    <span class="badge bg-primary">Current Level: {{ skill.proficiency_level }}/10</span>
+                </div>
+                <div class="card-body">
+                    <p>This assessment will test your knowledge of {{ product_type }} products. Answer all questions to receive your updated proficiency score.</p>
+
+                    <form method="post" id="assessmentForm">
+                        {% csrf_token %}
+                        {{ form.product_type }}
+                        <input type="hidden" name="questions" id="questionsData">
+
+                        {% for question in questions %}
+                            <div class="question-container mt-4" id="question-{{ question.id }}">
+                                <h5 class="mb-3">Question {{ forloop.counter }}: {{ question.text }}</h5>
+                                <div class="options-list">
+                                    {% for option in question.options %}
+                                        <div class="option-item" data-question="{{ question.id }}" data-option="{{ forloop.counter0 }}" onclick="selectOption(this)">
+                                            {{ option }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Submit Assessment</button>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Benefits of Skill Assessment</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="assessment-card h-100 p-3 border">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-chart-line fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="text-center">Track Progress</h5>
+                                <p class="text-center mb-0">Monitor your skill improvement over time</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="assessment-card h-100 p-3 border">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-graduation-cap fa-2x text-success"></i>
+                                </div>
+                                <h5 class="text-center">Identify Gaps</h5>
+                                <p class="text-center mb-0">Find areas where you need more learning</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="assessment-card h-100 p-3 border">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-rupee-sign fa-2x text-warning"></i>
+                                </div>
+                                <h5 class="text-center">Earn More</h5>
+                                <p class="text-center mb-0">Higher skill levels lead to better sales conversion</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Global variable to store all answers
+    const answers = {};
+
+    // Function to handle option selection
+    function selectOption(element) {
+        const questionId = element.getAttribute('data-question');
+        const optionIndex = element.getAttribute('data-option');
+
+        // Clear previous selection for this question
+        document.querySelectorAll(`.option-item[data-question="${questionId}"]`).forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        // Mark this option as selected
+        element.classList.add('selected');
+
+        // Store answer
+        answers[questionId] = {
+            selected: parseInt(optionIndex),
+            // Assuming first option (index 0) is always correct for demo purposes
+            // In a real app, this would be determined by the backend
+            correct: parseInt(optionIndex) === 0
+        };
+    }
+
+    // Form submission handler
+    document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+        // Check if all questions have been answered
+        const questionContainers = document.querySelectorAll('.question-container');
+        const totalQuestions = questionContainers.length;
+        const answeredQuestions = Object.keys(answers).length;
+
+        if (answeredQuestions < totalQuestions) {
+            e.preventDefault();
+            alert(`Please answer all questions. You've answered ${answeredQuestions} of ${totalQuestions} questions.`);
+            return;
+        }
+
+        // Add answers to hidden field
+        document.getElementById('questionsData').value = JSON.stringify(answers);
+    });
+</script>
+{% endblock %}
